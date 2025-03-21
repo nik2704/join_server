@@ -31,7 +31,7 @@ else ()
 endif()
 
 # Installation
-install(TARGETS bulk_server RUNTIME DESTINATION bin)
+install(TARGETS join_server RUNTIME DESTINATION bin)
 
 # CPack Configuration
 set(CPACK_GENERATOR DEB)
