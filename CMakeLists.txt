@@ -1,26 +1,14 @@
 cmake_minimum_required(VERSION 3.12)
-project(join_server)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "join_server")
-set(CPACK_PACKAGE_VERSION "0.0.${PATCH_VERSION}")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name <your@email.com>")
-set(CPACK_PACKAGE_CONTACT "Your Name <your@email.com>")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-test-dev")
-set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-Linux")
-include(CPack)
+set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
+set(PROJECT_VERSION 0.0.${PATCH_VERSION})
 
-# Опции для статической линковки (если нужно)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)  # Используйте только если хотите статический рантайм
+project(join_server VERSION ${PROJECT_VERSION})
 
-# Добавляем исполняемый файл
-add_executable(join_server 
+option(WITH_BOOST_TEST "Whether to build Boost test" ON)
+
+# ✅ Create bulk_server executable before linking
+add_executable(join_server
     main.cpp
 )
 
@@ -28,3 +16,27 @@ set_target_properties(join_server PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+
+# Include directories
+target_include_directories(join_server PRIVATE
+    ${Protobuf_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# Compiler Warnings
+if (MSVC)
+    target_compile_options(join_server PRIVATE /W4)
+else ()
+    target_compile_options(join_server PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
+# Installation
+install(TARGETS bulk_server RUNTIME DESTINATION bin)
+
+# CPack Configuration
+set(CPACK_GENERATOR DEB)
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+set(CPACK_PACKAGE_CONTACT example@example.com)
+include(CPack)
